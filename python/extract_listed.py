@@ -272,34 +272,10 @@ def lemmatize_word(entry):
 
 
 def main():
-    sent_set = [
-        "Prevention and treatment involve maintaining a healthy diet, regular physical exercise, a normal body weight, and avoiding use of tobacco.",
-        "Serious long-term complications include cardiovascular disease, stroke, chronic kidney disease, foot ulcers, damage to the nerves, damage to the eyes and cognitive impairment.",
-        "In addition to the known ones above, they include blurred vision, headache, fatigue, slow healing of cuts, and itchy skin.",
-        "It was widely used by professional writers, in offices, and for business correspondence in private homes.",
-        "Newton originally divided the spectrum into six named colors: red, orange, yellow, green, blue, and violet.",
-        "The human eye is relatively insensitive to indigo's frequencies, and some people who have otherwise-good vision cannot distinguish indigo from blue and violet.",
-        "Recommended measures to prevent infection include frequent hand washing, maintaining physical distance from others (especially from those with symptoms), quarantine, covering coughs, and keeping unwashed hands away from the face.",
-        "Management involves the treatment of symptoms, supportive care, isolation, and experimental measures."
-    ]
     debug = True
 
     if debug:
-        for test_sent in sent_set:
-            print(test_sent)
-            S = " ".join([token[0] for token in get_S(test_sent)])
-            print(S, " : ", end='')
-            for item in get_lined_ups(test_sent):
-                print(item, end=', ')
-            print()
-            print(subsent_tokenize(test_sent))
-            print()
         return
-
-    fileids = ["Diabetes", "Abraham Lincoln", "Typewriter", "Visible spectrum", "Coronavirus disease 2019"]
-    for fileid in fileids:
-        first_sent = wiki.summary(fileid, sentences=1)
-        print(chunk_sent(first_sent))
 
 
 main()
