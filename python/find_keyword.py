@@ -94,9 +94,10 @@ def flatten(inputlist):
             outputList.append(l)
     return outputList
 
-def findNP(sent):
+def findNP(sent, topic):
     grammar = r"""
-    NP: { <DT>? <JJ>* <NN.*>+ }
+    NP: { <DT|CD>? <JJ|PRP$>* <NN.*>+ <CD>* }
+    POS: { <NP> <POS> <NP>}
     XNP: { <CC|,> <NP> }
     CNP: { <NP> <XNP>+ }
     """
@@ -104,7 +105,7 @@ def findNP(sent):
     token = word_tokenize(sent)
     postag = pos_tag(token)
     chunk = chunk_parse.parse(postag)
-    leaves = [subtree.leaves() for subtree in chunk if type(subtree) == Tree and subtree.label() in ["NP", "CNP"]]
+    leaves = [subtree.leaves() for subtree in chunk if type(subtree) == Tree and subtree.label() in ["NP", "CNP", "POS"]]
     output = []
     for leaf in leaves:
         np = ""
@@ -113,19 +114,78 @@ def findNP(sent):
                 np = "{} {}".format(np, w)
             else:
                 np = w
-        output.append(np)
+        if topic not in np:
+            output.append(np)
+    return list(set(output))
+
+def isContain(a, b):
+    atmp = a.lower()
+    btmp = b.lower()
+    # print (atmp, btmp)
+    if atmp == btmp or atmp.startswith(btmp):
+        return True
+    return False
+
+def refineKeyword(np, ner, topic):
+    lowerNp = [w.lower() for w in np if topic not in w]
+    lowerNer = [w.lower() for w, p in ner]
+    lowerTopic = topic.lower()
+    refinedNp = set()
+    for n in lowerNp:
+        if isContain(n, lowerTopic):
+            continue
+        else:
+            flag = 0
+            for e in lowerNer:
+                if n in e or e in n:
+                    flag = 1
+                    break
+                else:
+                    continue
+            if flag == 1:
+                continue
+            else:
+                refinedNp.add(n)
+    return refinedNp
+
+# LOC: Location
+# PER: Person
+# ORG: Organization
+# NP: undefined keywords
+def makeLabeling(np, ner):
+    output = set()
+    for n in np:
+        output.add((n, "NP"))
+    for w, p in ner:
+        if p == "MISC":
+            output.add((w, "NP"))
+        else:
+            output.add((w, p))
+    return output
+
+def removeTopic(keywords, topic):
+    keywordList = list(set(keywords))
+    output = []
+    for i, item in enumerate(keywordList):
+        if item[0] == topic or topic in item[0]:
+            continue
+        else:
+            output.append(item)
     return output
 
 output = open("output_temp.csv", "w", encoding="utf-8")
 wr = csv.writer(output)
+wr.writerow(["ID", "TOPIC", "KEYWORDS", "SENTENCE"])
 for i, sent in enumerate(loadedSent):
     print (i+1)
     nerList = list(makeNERList(sent).items())
     nerKeys = [w for w, t in nerList]
     sentList = sent_tokenize(sent)
-    np = []
+    np = set()
     for s in sentList:
-        leaves = findNP(s)
-        print (leaves)
-        np += leaves
-    wr.writerow([i+1, np, nerList, sent])
+        leaves = findNP(s, loadedTopic[i])
+        leaves = refineKeyword(leaves, nerList, loadedTopic[i])
+        np = np | leaves
+    keywords = makeLabeling(np, nerList)
+    keywords = removeTopic(keywords, loadedTopic[i])
+    wr.writerow([i+1, loadedTopic[i], keywords, sent])
