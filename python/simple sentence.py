@@ -43,7 +43,7 @@ def remove_parenthesis(data):
     s = s.lower()
     keywords =[]
     for (word, tag) in data[2]:
-        if s.find(word)>0:
+        if s.find(word.lower())>0:
             keywords.append((word,tag))
     data[2] = keywords
     return data
@@ -56,7 +56,7 @@ def make_simple(data):
         conj =[]
         tagged = pos_tag(word_tokenize(s))
         for i, (word, tag) in enumerate(tagged):
-            if tag =='CC':
+            if tag =='CC' and word!= 'and':
                 conj.append(i)
         if(len(conj)==0):
             result.append(s)
@@ -86,7 +86,7 @@ def make_simple(data):
     for s in result:
         keywords =[]
         for (word, tag) in data[2]:
-            if(s.lower().find(word)>0):
+            if(s.lower().find(word.lower())>0):
                 keywords.append((word,tag))
         if(len(keywords)>0):
             return_val.append([data[0],data[1],keywords,s])
