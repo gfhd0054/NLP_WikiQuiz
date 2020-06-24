@@ -16,7 +16,18 @@ data = [6,"baseball",[('the bottom', 'NP'), ('doubleheaders', 'NP'), ('nine play
 #        "Euthanasia is the practice of intentionally ending a life to relieve pain and suffering.Different countries have different euthanasia laws. The British House of Lords select committee on medical ethics defines euthanasia as ""a deliberate intervention undertaken with the express intention of ending a life, to relieve intractable suffering"". In the Netherlands and Belgium, euthanasia is understood as ""termination of life by a doctor at the request of a patient"". The Dutch law, however, does not use the term 'euthanasia' but includes the concept under the broader definition of ""assisted suicide and termination of life on request."]
 
 
-
+def remove_this_term(data):
+    result =[]
+    this_terms = ['this', 'that','these','those']
+    for word,tag in data[2]:
+        no_this_term = True
+        for t in this_terms:
+            if(word.find(t)>0):
+                no_this_term = False
+        if(no_this_term):
+            result.append((word,tag))
+    data[2] = result
+    return data
 
 def remove_parenthesis(data):
     s = data[3]
@@ -80,9 +91,9 @@ def make_simple(data):
         if(len(keywords)>0):
             return_val.append([data[0],data[1],keywords,s])
     return return_val
-    
-    
 
+
+data = remove_this_term(data)
 data = remove_parenthesis(data)
 data = make_simple(data)
 print(data)
