@@ -11,6 +11,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 
 from allennlp.predictors.predictor import Predictor
 import allennlp_models.tagging
+import allennlp_models.structured_prediction
 
 def loadFile(filename):
     f = open(filename, "r", encoding="utf-8")
@@ -74,16 +75,16 @@ def lemmatize(pair):
 
 def extractSemantic(sent):
     stopWords = set(stopwords.words('english'))
-    context = word_tokenize(sent)
-    tag = pos_tag(context)
+    tag = allen_pos_tag(sent)
     context = [(w.lower(), p) for w, p in tag if w not in stopWords and w.isalpha()]
     context = [lemmatize(item) for item in context]
     context = [w.lower() for w in context if type(w) == str]
     fdist = nltk.FreqDist(w for w in context)
     return list(fdist.keys())[:10]
 
-loadedTopic, loadedSent = loadFile("input.csv")
+loadedTopic, loadedSent = loadFile("../csv/input.csv")
 predictor = Predictor.from_path("https://storage.googleapis.com/allennlp-public-models/ner-model-2020.02.10.tar.gz")
+constituency_predictor = Predictor.from_path("https://storage.googleapis.com/allennlp-public-models/elmo-constituency-parser-2020.02.10.tar.gz")
 
 def flatten(inputlist):
     outputList = []
@@ -102,8 +103,7 @@ def findNP(sent, topic):
     CNP: { <NP> <XNP>+ }
     """
     chunk_parse = RegexpParser(grammar)
-    token = word_tokenize(sent)
-    postag = pos_tag(token)
+    postag = allen_pos_tag(sent)
     chunk = chunk_parse.parse(postag)
     leaves = [subtree.leaves() for subtree in chunk if type(subtree) == Tree and subtree.label() in ["NP", "CNP", "POS"]]
     output = []
@@ -173,7 +173,12 @@ def removeTopic(keywords, topic):
             output.append(item)
     return output
 
-output = open("output_temp.csv", "w", encoding="utf-8")
+def allen_pos_tag(sentence):
+    predicted_sentence = constituency_predictor.predict(sentence=sentence)
+    return [(token, pos_tag) for token, pos_tag in zip(predicted_sentence['tokens'], predicted_sentence['pos_tags'])]
+
+
+output = open("output_temp.csv", "w", encoding="utf-8", newline='')
 wr = csv.writer(output)
 wr.writerow(["ID", "TOPIC", "KEYWORDS", "SENTENCE"])
 for i, sent in enumerate(loadedSent):
