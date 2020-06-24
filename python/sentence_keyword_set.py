@@ -21,5 +21,6 @@ input_list = [
     ('Enrique Colla was an Argentine football player.', 'Enrique Colla'),
     ("Caroline Ann O'Connor  (born 2 September 1962) is a Helpmann Award-winning, Olivier Award-nominated Anglo-Australian singer, dancer and actress (theatre, film, TV).", "Caroline Ann O'Connor"),
     ('Harry George Tate (18 July 1862 – 9 March 1949) was an English cricketer who played one first-class cricket match for Somerset in 1882.', 'Harry George Tate'),
-    ('Hirokazu Kore-eda (是枝 裕和, Koreeda Hirokazu, born 6 June 1962) is a Japanese film director, producer, screenwriter, and editor.', 'Hirokazu Kore-eda')
+    ('Hirokazu Kore-eda (是枝 裕和, Koreeda Hirokazu, born 6 June 1962) is a Japanese film director, producer, screenwriter, and editor.', 'Hirokazu Kore-eda'),
+    ('Coronaviruses are a group of related RNA viruses that cause diseases in mammals and birds.', 'mammals and birds')
 ]
